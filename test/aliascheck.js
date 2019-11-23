@@ -59,7 +59,8 @@ describe("Aliascheck test", function () {
             await cir.calculateWitness({in: inp}, true);
             assert(false);
         } catch(err) {
-            assert(/Constraint\sdoesn't\smatch(.*)1\s!=\s0/.test(err.message) );
+            assert(err.message.indexOf("Constraint doesn't match") >= 0);
+            assert(err.message.indexOf("1 != 0") >= 0);
         }
     });
 
@@ -70,7 +71,8 @@ describe("Aliascheck test", function () {
             await cir.calculateWitness({in: inp}, true);
             assert(false);
         } catch(err) {
-            assert(/Constraint\sdoesn't\smatch(.*)1\s!=\s0/.test(err.message) );
+            assert(err.message.indexOf("Constraint doesn't match") >= 0);
+            assert(err.message.indexOf("1 != 0") >= 0);
         }
     });
 

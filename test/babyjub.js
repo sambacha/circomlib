@@ -87,7 +87,8 @@ describe("Baby Jub test", function () {
             await circuitTest.calculateWitness({x: 1, y: 0}, true);
             assert(false, "Should be a valid point");
         } catch(err) {
-            assert(/Constraint\sdoesn't\smatch(.*)168700\s!=\s1/.test(err.message) );
+            assert(err.message.indexOf("Constraint doesn't match") >= 0);
+            assert(err.message.indexOf("168700 != 1") >= 0);
         }
     });
 
@@ -109,5 +110,4 @@ describe("Baby Jub test", function () {
 
         await circuitPbk.checkConstraints(w);
     });
-
 });
