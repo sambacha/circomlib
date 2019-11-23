@@ -1,68 +1,70 @@
 const chai = require("chai");
 const path = require("path");
-const tester = require("circom").tester;
-
-const Fr = require("ffjavascript").bn128.Fr;
+const snarkjs = require("snarkjs");
+const compiler = require("circom");
 
 const eddsa = require("../src/eddsa.js");
 
 const assert = chai.assert;
 
-describe("EdDSA MiMC test", function () {
+const bigInt = snarkjs.bigInt;
+
+describe("EdDSA MiMCSponge test", function () {
     let circuit;
 
     this.timeout(100000);
 
     before( async () => {
+        const cirDef = await compiler(path.join(__dirname, "circuits", "eddsamimcsponge_test.circom"));
 
-        circuit = await tester(path.join(__dirname, "circuits", "eddsamimc_test.circom"));
+        circuit = new snarkjs.Circuit(cirDef);
+
+        console.log("NConstrains EdDSA MiMCSponge: " + circuit.nConstraints);
     });
 
     it("Sign a single number", async () => {
-        const msg = Fr.e(1234);
+        const msg = bigInt(1234);
 
         const prvKey = Buffer.from("0001020304050607080900010203040506070809000102030405060708090001", "hex");
 
         const pubKey = eddsa.prv2pub(prvKey);
 
-        const signature = eddsa.signMiMC(prvKey, msg);
+        const signature = eddsa.signMiMCSponge(prvKey, msg);
 
-        assert(eddsa.verifyMiMC(msg, signature, pubKey));
+        assert(eddsa.verifyMiMCSponge(msg, signature, pubKey));
 
-        const w = await circuit.calculateWitness({
+        const w = circuit.calculateWitness({
             enabled: 1,
             Ax: pubKey[0],
             Ay: pubKey[1],
             R8x: signature.R8[0],
             R8y: signature.R8[1],
             S: signature.S,
-            M: msg}, true);
+            M: msg});
 
-
-        await circuit.checkConstraints(w);
-
+        assert(circuit.checkWitness(w));
     });
 
     it("Detect Invalid signature", async () => {
-        const msg = Fr.e(1234);
+        const msg = bigInt(1234);
 
         const prvKey = Buffer.from("0001020304050607080900010203040506070809000102030405060708090001", "hex");
 
         const pubKey = eddsa.prv2pub(prvKey);
 
 
-        const signature = eddsa.signMiMC(prvKey, msg);
+        const signature = eddsa.signMiMCSponge(prvKey, msg);
 
-        assert(eddsa.verifyMiMC(msg, signature, pubKey));
+        assert(eddsa.verifyMiMCSponge(msg, signature, pubKey));
         try {
-            const w = await circuit.calculateWitness({
+            const w = circuit.calculateWitness({
                 enabled: 1,
                 Ax: pubKey[0],
                 Ay: pubKey[1],
-                R8x: Fr.add(signature.R8[0], Fr.e(1)),
+                R8x: signature.R8[0].add(bigInt(1)),
                 R8y: signature.R8[1],
                 S: signature.S,
-                M: msg}, true);
+                M: msg});
             assert(false);
         } catch(err) {
             assert(err.message.indexOf("Constraint doesn't match") >= 0);
@@ -72,27 +74,26 @@ describe("EdDSA MiMC test", function () {
 
 
     it("Test a dissabled circuit with a bad signature", async () => {
-        const msg = Fr.e(1234);
+        const msg = bigInt(1234);
 
         const prvKey = Buffer.from("0001020304050607080900010203040506070809000102030405060708090001", "hex");
 
         const pubKey = eddsa.prv2pub(prvKey);
 
 
-        const signature = eddsa.signMiMC(prvKey, msg);
+        const signature = eddsa.signMiMCSponge(prvKey, msg);
 
-        assert(eddsa.verifyMiMC(msg, signature, pubKey));
+        assert(eddsa.verifyMiMCSponge(msg, signature, pubKey));
 
-        const w = await  circuit.calculateWitness({
+        const w = circuit.calculateWitness({
             enabled: 0,
             Ax: pubKey[0],
             Ay: pubKey[1],
-            R8x: Fr.add(signature.R8[0], Fr.e(1)),
+            R8x: signature.R8[0].add(bigInt(1)),
             R8y: signature.R8[1],
             S: signature.S,
-            M: msg}, true);
+            M: msg});
 
-        await circuit.checkConstraints(w);
-
+        assert(circuit.checkWitness(w));
     });
 });

@@ -68,7 +68,8 @@ describe("EdDSA Poseidon test", function () {
                 M: msg}, true);
             assert(false);
         } catch(err) {
-            assert(/Constraint\sdoesn't\smatch(.*)1\s!=\s0/.test(err.message) );
+            assert(err.message.indexOf("Constraint doesn't match") >= 0);
+            assert(err.message.indexOf("1 != 0") >= 0);
         }
     });
 
