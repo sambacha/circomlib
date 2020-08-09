@@ -10,8 +10,8 @@ const log = (msg) => { if (process.env.MOCHA_VERBOSE) console.log(msg); };
 describe("Poseidon Smart contract test", function () {
     let testrpc;
     let web3;
-    let poseidon6;
-    let poseidon3;
+    let poseidon2;
+    let poseidon4;
     let accounts;
     this.timeout(100000);
 
@@ -24,38 +24,38 @@ describe("Poseidon Smart contract test", function () {
         const C6 = new web3.eth.Contract(poseidonGenContract.generateABI(5));
         const C3 = new web3.eth.Contract(poseidonGenContract.generateABI(2));
 
-        poseidon6 = await C6.deploy({
-            data: poseidonGenContract.createCode(5)
+        poseidon2 = await C.deploy({
+            data: poseidonGenContract.createCode(2)
         }).send({
-            gas: 5000000,
+            gas: 2500000,
             from: accounts[0]
         });
-        poseidon3 = await C3.deploy({
-            data: poseidonGenContract.createCode(2)
+        poseidon4 = await C.deploy({
+            data: poseidonGenContract.createCode(4)
         }).send({
             gas: 5000000,
             from: accounts[0]
         });
     });
 
-    it("Should calculate the poseidon correctly t=6", async () => {
+    it("Shold calculate the poseidon correctly for 2 inputs", async () => {
 
-        const res = await poseidon6.methods.poseidon([1,2, 0, 0, 0]).call();
+        const res = await poseidon2.methods.poseidon([1, 2]).call();
 
         // console.log("Cir: " + bigInt(res.toString(16)).toString(16));
 
-        const res2 = poseidon([1,2, 0, 0, 0]);
+        const res2 = poseidon([1, 2]);
         // console.log("Ref: " + bigInt(res2).toString(16));
 
         assert.equal(res.toString(), res2.toString());
     });
-    it("Should calculate the poseidon correctly t=3", async () => {
+    it("Shold calculate the poseidon correctly for 4 inputs", async () => {
 
-        const res = await poseidon3.methods.poseidon([1,2]).call();
+        const res = await poseidon4.methods.poseidon([1, 2, 3, 4]).call();
 
         // console.log("Cir: " + bigInt(res.toString(16)).toString(16));
 
-        const res2 = poseidon([1,2]);
+        const res2 = poseidon([1, 2, 3, 4]);
         // console.log("Ref: " + bigInt(res2).toString(16));
 
         assert.equal(res.toString(), res2.toString());

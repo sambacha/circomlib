@@ -113,7 +113,7 @@ function signPoseidon(prv, msg) {
     r = Fr.e(r);
     const R8 = babyJub.mulPointEscalar(babyJub.Base8, r);
     const hm = poseidon([R8[0], R8[1], A[0], A[1], msg]);
-    const S = Fr.add(r , Fr.mul(hm, s));
+    const S = r.add(hm.mul(s)).mod(babyJub.subOrder);
     return {
         R8: R8,
         S: S
