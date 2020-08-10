@@ -27,7 +27,7 @@ describe("Poseidon Smart contract test", function () {
         poseidon2 = await C.deploy({
             data: poseidonGenContract.createCode(2)
         }).send({
-            gas: 2500000,
+            gas: 5000000,
             from: accounts[0]
         });
         poseidon4 = await C.deploy({

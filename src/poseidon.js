@@ -51,4 +51,3 @@ function poseidon(inputs) {
 }
 
 module.exports = poseidon;
-module.exports.F = F;
